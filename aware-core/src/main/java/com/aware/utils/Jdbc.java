@@ -69,7 +69,7 @@ public class Jdbc {
      * @return true if a connection was established, false otherwise.
      */
     public static boolean testConnection(String host, String port, String name, String username, String password, Boolean config_without_password, String input_password) {
-        String connectionUrl = String.format("jdbc:mysql://%s:%s/%s", host, port, name);
+        String connectionUrl = String.format("jdbc:mysql://%s:%s/%s?useSSL=true&requireSSL=true&verifyServerCertificate=true", host, port, name);
         Log.i(TAG, "Establishing connection to remote database...");
 
 
@@ -100,7 +100,7 @@ public class Jdbc {
      * @param context application context
      */
     private static void connect(Context context) throws JdbcConnectionException {
-        String connectionUrl = String.format("jdbc:mysql://%s:%s/%s?rewriteBatchedStatements=true",
+        String connectionUrl = String.format("jdbc:mysql://%s:%s/%s?rewriteBatchedStatements=true&useSSL=true&requireSSL=true&verifyServerCertificate=true",
                 Aware.getSetting(context, Aware_Preferences.DB_HOST),
                 Aware.getSetting(context, Aware_Preferences.DB_PORT),
                 Aware.getSetting(context, Aware_Preferences.DB_NAME));

@@ -1,0 +1,31 @@
+MySQL Connector/J 5.1.48 hostname verification patch (AWARE)
+Verifies that the server certificate matches the host name after the TLS handshake
+in com.mysql.jdbc.ExportControlled.transformSocketToSSLSocket. Apply with `patch -p0`
+from the Connector/J 5.1.48 source root; see build.sh.
+
+--- com/mysql/jdbc/ExportControlled.java
++++ com/mysql/jdbc/ExportControlled.java
+@@ -60,9 +60,11 @@
+ import java.util.Set;
+ 
+ import javax.crypto.Cipher;
++import javax.net.ssl.HttpsURLConnection;
+ import javax.net.ssl.KeyManager;
+ import javax.net.ssl.KeyManagerFactory;
+ import javax.net.ssl.SSLContext;
++import javax.net.ssl.SSLPeerUnverifiedException;
+ import javax.net.ssl.SSLSocket;
+ import javax.net.ssl.SSLSocketFactory;
+ import javax.net.ssl.TrustManager;
+@@ -184,6 +186,11 @@
+             }
+ 
+             ((SSLSocket) mysqlIO.mysqlConnection).startHandshake();
++            // AWARE patch: verify the certificate matches the host name before any credentials are sent
++            if (mysqlIO.connection.getVerifyServerCertificate() && !HttpsURLConnection.getDefaultHostnameVerifier()
++                    .verify(mysqlIO.host, ((SSLSocket) mysqlIO.mysqlConnection).getSession())) {
++                throw new SSLPeerUnverifiedException("Server certificate does not match host " + mysqlIO.host);
++            }
+ 
+             if (mysqlIO.connection.getUseUnbufferedInput()) {
+                 mysqlIO.mysqlInput = mysqlIO.mysqlConnection.getInputStream();
