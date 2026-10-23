@@ -259,6 +259,13 @@ public class StudyUtils extends IntentService {
         try {
             Aware.setSetting(context, Aware_Preferences.WEBSERVICE_SERVER, webserviceServer);
             JSONObject studyConfig = configs.getJSONObject(0);  // use first config
+
+            // Record the received config in aware_log, without the database password
+            JSONObject loggedConfig = new JSONObject(studyConfig.toString());
+            JSONObject loggedDatabase = loggedConfig.optJSONObject("database");
+            if (loggedDatabase != null) loggedDatabase.remove("database_password");
+            Aware.debug(context, "Applying study config: " + loggedConfig);
+
             JSONObject studyInfo = studyConfig.optJSONObject("study_info");
 
             if (studyInfo == null) {
@@ -511,6 +518,8 @@ public class StudyUtils extends IntentService {
                     } catch (Exception e) {
                         Log.e(Aware.TAG, "processSensorSettings: Error applying setting " + setting +
                                 ": " + e.getMessage());
+                        Aware.debug(context, "processSensorSettings: Error applying setting " + setting +
+                                ": " + e.getMessage());
                     }
                 } else {
                     Log.d(Aware.TAG, "processSensorSettings: Sensor config missing required fields");
@@ -533,8 +542,12 @@ public class StudyUtils extends IntentService {
             } else {
                 Log.e(Aware.TAG, "processSensorSettings: Setting verification failed for " + key +
                         ": expected=" + expectedValue + ", actual=" + actualValue + " ✗");
+                Aware.debug(context, "processSensorSettings: Setting verification failed for " + key +
+                        ": expected=" + expectedValue + ", actual=" + actualValue);
             }
         }
+        Aware.debug(context, "processSensorSettings: Applied " + appliedSettings.size() + " of " +
+                sensors.length() + " sensor settings");
     }
 
     /**
