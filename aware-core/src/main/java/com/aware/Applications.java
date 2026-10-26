@@ -308,8 +308,8 @@ public class Applications extends AccessibilityService {
                     }
                 }
 
-                currScreenText = "";
             }
+            currScreenText = "";
 
         }
 
